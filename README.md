@@ -1,1 +1,1 @@
-# AudioAnalyszer
+# AudioAnalyzer

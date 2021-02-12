@@ -1,4 +1,4 @@
-from gui import fMain
+from aa_gui import fMain
 import wx 
 
 from numpy import arange, sin, pi
@@ -15,7 +15,8 @@ class myGui(fMain):
         fMain.__init__(self, parent)
         #super(myGui, self).__init__(parent)
         #self.m_staticText41.Hide()
-        #self.panelPlot.Hide()
+        self.panel = CanvasPanel(self.panelPlot)
+        self.panel.draw()
         return
     def btStartClick(self, event):
         self.statusBar.SetStatusText("test")
@@ -39,34 +40,31 @@ class myGui(fMain):
            self.panelSetup.Disable()
            self.panelMeas.Disable()
 
+    def OnSize(self, event):
+        self.Layout()
+        self.statusBar.SetStatusText("niak")
+
 
 class CanvasPanel(wx.Panel):
     def __init__(self, parent):
-        #super(CanvasPanel, self).__init__(parent) 
-        #panel = wx.Panel(self)
-        self.panel=wx.Panel.__init__(self, parent)
-        #self.SetSize((400, 400))
-        #self.Layout()
+        sizerPanel = wx.BoxSizer(wx.VERTICAL)
 
-        self.figure = Figure(figsize=(10,5))
-        #self.figure.set_figheight(6)
-        #self.figure.set_figwidth(10)
-        #self.figure.set_figwidddth(10)
+        wx.Panel.__init__(self, parent,size=wx.Size(806, 450))
+        sizerPlot = wx.BoxSizer(wx.VERTICAL)
+        self.SetBackgroundColour("red")
+
+        self.GetParent().SetSizer(sizerPanel)
+        sizerPanel.Add(self, 1, wx.EXPAND | wx.ALL | wx.GROW )
+        self.figure = Figure()
         self.axes = self.figure.add_subplot(111)
         self.canvas = FigureCanvas(self, -1, self.figure)
-
         #cursor event connection to function
         self.canvas.mpl_connect('motion_notify_event', self.UpdateStatusBar)
 
         self.toolbar = NavigationToolbar(self.canvas)
-        #self.toolbar.Realize()
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self.canvas, 1, wx.EXPAND | wx.ALL)
-        sizer.Add(self.toolbar, 0, wx.EXPAND | wx.ALL)
-        self.SetSizerAndFit(sizer)
-        #self.SetSizer(sizer)
-
-        #self.Fit()
+        sizerPlot.Add(self.canvas ,1, wx.EXPAND | wx.ALL | wx.GROW )
+        sizerPlot.Add(self.toolbar, 0, wx.EXPAND | wx.ALL | wx.GROW )
+        self.SetSizer(sizerPlot)
 
     def UpdateStatusBar(self, event):
         if event.inaxes:
@@ -93,9 +91,7 @@ class CanvasPanel(wx.Panel):
 if __name__ == '__main__':
     app = wx.App()
     frame = myGui(None)
-    panel = CanvasPanel(frame.panelPlot)
     #frame.drawPlot()
-    panel.draw()
     frame.Show()
     app.MainLoop()
     

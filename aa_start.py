@@ -63,6 +63,7 @@ class myGui(fMain):
                              "Left Plug-in Filter",
                              "Right Plug-in Filter"]
 
+        self.plt=[]
         myList=[]
         myList=self.Dict2List(self.meas_dict)
         self.comboBMeasType.Clear()
@@ -188,7 +189,6 @@ class myGui(fMain):
            #     #lsteps.append(round(strtf*10.0**(float(n)/float(num_steps))))
            #     lsteps.append(strtf*10.0**(float(n)/float(num_steps)))
             lsteps=np.logspace(math.log10(strtf),math.log10(stopf),npoints,True)
-            print(npoints)
 
         elif self.meas_conf["axe_type"] == "io":
             start_amp = self.startAmp.GetValue()
@@ -198,11 +198,10 @@ class myGui(fMain):
             lsteps = np.linspace(start_amp, stop_amp, num_steps)
 
             amp_buf = ((stop_amp - start_amp)*0.1)/2.0
-            print(amp_buf)
             self.panel.axes.set_xlim(((start_amp - amp_buf), (stop_amp + amp_buf)))
-
-        self.plt = self.panel.axes.plot(marker = 'x')
-
+        if len(self.plt) == 3:
+            self.plt=[]
+        self.plt.append(self.panel.axes.plot([],[], self.meas_conf["color"],marker = 'o',label=self.meas_conf["color"])[0])
 
         for i in lsteps: 
             meas_point = random.randint(1, 10)
@@ -210,18 +209,15 @@ class myGui(fMain):
             self.x.append(float(i))
             self.y.append(float(meas_point))
           
-            self.update_plot(self.x, self.y)
+            self.update_plot(self.x, self.y,(len(self.plt)-1))
 
     def onClear(self, event):
         self.panel.clear()
         self.UpdateAxes()
 
-    def update_plot(self, x, y):
-        #print("ploter selected color : " + self.plot_color)
-        #if (len(self.plt) < 1):
-        #self.plt = self.a.plot(x, y, color=self.plot_color,marker = 'o',label=self.plot_color)
-        self.plt = self.panel.axes.plot(x, y, self.meas_conf["color"],marker = 'o',label="toto")
-        self.plt[0].set_data(x, y)
+    def update_plot(self, x, y, plotID):
+        #self.plt = self.panel.axes.plot(x, y, self.meas_conf["color"],marker = 'o',label="toto")
+        self.plt[plotID].set_data(x, y)
         ymin = min(y)
         ymax = max(y)
         
@@ -238,6 +234,7 @@ class myGui(fMain):
         #self.a.set_ylim((ymin - abs(ymin*0.10), ymax + abs(ymax*0.10)))
         self.panel.axes.set_ylim((ymin - abs(sep), ymax + abs(sep)))
         self.panel.canvas.draw()
+        self.panel.axes.legend()
 
     def onMeasChange(self, event):
         measID=self.comboBMeasType.GetCurrentSelection()

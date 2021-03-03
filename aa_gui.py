@@ -17,9 +17,9 @@ import wx.xrc
 class fMain ( wx.Frame ):
 
 	def __init__( self, parent ):
-		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Audio Analyzer Control", pos = wx.DefaultPosition, size = wx.Size( 1200,700 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
+		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Audio Analyzer Control", pos = wx.DefaultPosition, size = wx.Size( 1200,800 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
 
-		self.SetSizeHints( wx.Size( 1200,700 ), wx.DefaultSize )
+		self.SetSizeHints( wx.Size( 1200,800 ), wx.DefaultSize )
 
 		self.m_menubar1 = wx.MenuBar( 0 )
 		self.file = wx.Menu()
@@ -84,10 +84,10 @@ class fMain ( wx.Frame ):
 		sbSizer2 = wx.StaticBoxSizer( wx.StaticBox( self.panelMeas, wx.ID_ANY, u"Measurement Title" ), wx.VERTICAL )
 
 		self.txtMeasTitle = wx.TextCtrl( sbSizer2.GetStaticBox(), wx.ID_ANY, u"Title", wx.DefaultPosition, wx.Size( 200,-1 ), 0 )
-		sbSizer2.Add( self.txtMeasTitle, 1, wx.ALL|wx.EXPAND, 5 )
+		sbSizer2.Add( self.txtMeasTitle, 0, wx.ALL|wx.EXPAND, 5 )
 
 
-		bSizer61.Add( sbSizer2, 1, wx.ALL|wx.EXPAND, 5 )
+		bSizer61.Add( sbSizer2, 0, wx.ALL|wx.EXPAND, 5 )
 
 		sbSizer1 = wx.StaticBoxSizer( wx.StaticBox( self.panelMeas, wx.ID_ANY, u"Measurement Type" ), wx.VERTICAL )
 
@@ -97,7 +97,7 @@ class fMain ( wx.Frame ):
 		sbSizer1.Add( self.comboBMeasType, 0, wx.ALL|wx.EXPAND, 5 )
 
 
-		bSizer61.Add( sbSizer1, 1, wx.ALL|wx.EXPAND, 5 )
+		bSizer61.Add( sbSizer1, 0, wx.ALL|wx.EXPAND, 5 )
 
 		sbSizer6 = wx.StaticBoxSizer( wx.StaticBox( self.panelMeas, wx.ID_ANY, u"Units" ), wx.VERTICAL )
 
@@ -107,24 +107,12 @@ class fMain ( wx.Frame ):
 		sbSizer6.Add( self.comboBMeasUnits, 0, wx.ALL|wx.EXPAND, 5 )
 
 
-		bSizer61.Add( sbSizer6, 1, wx.ALL|wx.EXPAND, 5 )
+		bSizer61.Add( sbSizer6, 0, wx.ALL|wx.EXPAND, 5 )
 
-		sbSizer4 = wx.StaticBoxSizer( wx.StaticBox( self.panelMeas, wx.ID_ANY, u"Plot Number" ), wx.HORIZONTAL )
-
-		self.radioBtn1 = wx.RadioButton( sbSizer4.GetStaticBox(), wx.ID_ANY, u"1", wx.DefaultPosition, wx.DefaultSize, 0 )
-		sbSizer4.Add( self.radioBtn1, 1, wx.ALL, 5 )
-
-		self.radioBtn2 = wx.RadioButton( sbSizer4.GetStaticBox(), wx.ID_ANY, u"2", wx.DefaultPosition, wx.DefaultSize, 0 )
-		sbSizer4.Add( self.radioBtn2, 1, wx.ALL, 5 )
-
-		self.radioBtn3 = wx.RadioButton( sbSizer4.GetStaticBox(), wx.ID_ANY, u"3", wx.DefaultPosition, wx.DefaultSize, 0 )
-		sbSizer4.Add( self.radioBtn3, 1, wx.ALL, 5 )
-
-		self.radioBtn4 = wx.RadioButton( sbSizer4.GetStaticBox(), wx.ID_ANY, u"4", wx.DefaultPosition, wx.DefaultSize, 0 )
-		sbSizer4.Add( self.radioBtn4, 1, wx.ALL, 5 )
-
-
-		bSizer61.Add( sbSizer4, 1, wx.ALL|wx.EXPAND|wx.SHAPED, 5 )
+		rbNbLinesChoices = [ u"1", u"2", u"3", u"4" ]
+		self.rbNbLines = wx.RadioBox( self.panelMeas, wx.ID_ANY, u"Number Lines", wx.DefaultPosition, wx.DefaultSize, rbNbLinesChoices, 1, wx.RA_SPECIFY_ROWS )
+		self.rbNbLines.SetSelection( 0 )
+		bSizer61.Add( self.rbNbLines, 0, wx.ALL|wx.EXPAND, 5 )
 
 		bSizer71 = wx.BoxSizer( wx.HORIZONTAL )
 
@@ -147,7 +135,7 @@ class fMain ( wx.Frame ):
 
 		bSizer81 = wx.BoxSizer( wx.VERTICAL )
 
-		self.panelFreqSweep = wx.Panel( self.panelSetup, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+		self.panelFreqSweep = wx.Panel( self.panelSetup, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,-1 ), wx.TAB_TRAVERSAL )
 		self.panelFreqSweep.SetBackgroundColour( wx.Colour( 253, 228, 131 ) )
 
 		sizerFreqSweep = wx.StaticBoxSizer( wx.StaticBox( self.panelFreqSweep, wx.ID_ANY, u"Frequency Sweep Control" ), wx.VERTICAL )
@@ -197,7 +185,7 @@ class fMain ( wx.Frame ):
 		self.panelFreqSweep.SetSizer( sizerFreqSweep )
 		self.panelFreqSweep.Layout()
 		sizerFreqSweep.Fit( self.panelFreqSweep )
-		bSizer81.Add( self.panelFreqSweep, 1, wx.EXPAND, 5 )
+		bSizer81.Add( self.panelFreqSweep, 0, wx.EXPAND|wx.FIXED_MINSIZE, 5 )
 
 		self.panelFreq = wx.Panel( self.panelSetup, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		self.panelFreq.SetBackgroundColour( wx.Colour( 242, 202, 48 ) )
@@ -261,7 +249,7 @@ class fMain ( wx.Frame ):
 		self.panelAmpSweep.SetSizer( sizerVoltSweep )
 		self.panelAmpSweep.Layout()
 		sizerVoltSweep.Fit( self.panelAmpSweep )
-		bSizer81.Add( self.panelAmpSweep, 1, wx.EXPAND |wx.ALL, 5 )
+		bSizer81.Add( self.panelAmpSweep, 0, wx.EXPAND |wx.ALL, 5 )
 
 		self.panelAmp = wx.Panel( self.panelSetup, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 		self.panelAmp.SetBackgroundColour( wx.Colour( 93, 159, 202 ) )
@@ -360,10 +348,7 @@ class fMain ( wx.Frame ):
 		self.txtMeasTitle.Bind( wx.EVT_TEXT, self.onTitleChange )
 		self.comboBMeasType.Bind( wx.EVT_COMBOBOX, self.onMeasChange )
 		self.comboBMeasUnits.Bind( wx.EVT_COMBOBOX, self.onUnitChange )
-		self.radioBtn1.Bind( wx.EVT_RADIOBUTTON, self.onColor )
-		self.radioBtn2.Bind( wx.EVT_RADIOBUTTON, self.onColor )
-		self.radioBtn3.Bind( wx.EVT_RADIOBUTTON, self.onColor )
-		self.radioBtn4.Bind( wx.EVT_RADIOBUTTON, self.onColor )
+		self.rbNbLines.Bind( wx.EVT_RADIOBOX, self.onNbLines )
 		self.btStart.Bind( wx.EVT_BUTTON, self.OnStart )
 		self.btClear.Bind( wx.EVT_BUTTON, self.onClear )
 
@@ -396,11 +381,8 @@ class fMain ( wx.Frame ):
 	def onUnitChange( self, event ):
 		event.Skip()
 
-	def onColor( self, event ):
+	def onNbLines( self, event ):
 		event.Skip()
-
-
-
 
 	def OnStart( self, event ):
 		event.Skip()

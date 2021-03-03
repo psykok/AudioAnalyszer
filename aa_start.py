@@ -6,6 +6,8 @@ import matplotlib
 import numpy as np
 import math
 
+import time
+
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.backends.backend_wx import NavigationToolbar2Wx as NavigationToolbar
 from matplotlib.figure import Figure
@@ -31,11 +33,18 @@ class myGui(fMain):
         self.GetGPIBDevices()
  
         # populate measurment type combobox
-        self.meas_dict = {0: "THD+n",
-                          1: "Frequency Response",
-                          2: "THD+n (Ratio)",
-                          3: "Frequency Response (Ratio)",
-                          4: "Ouput Level"}
+        self.meas_type = ["THD+n",
+                          "Frequency Response",
+                          "THD+n (Ratio)",
+                          "Frequency Response (Ratio)",
+                          "Ouput Level"]
+
+        self.meas_type_code = ["M3",
+                               "M1",
+                               "M3",
+                               "M1",
+                               "M1"
+                ]
 
         self.meas_conf = { "title" : "THD mesure",
                            "type" : 0, 
@@ -57,18 +66,35 @@ class myGui(fMain):
                           ["%","dB"],  #Frequency Response (Ratio)
                           ["V","dBm"] #Ouput Level
                 ]
+        self.meas_unit_code = ["LN",
+                               "LG"]
         
-        self.meas_filters = ["30 kHz Low Pass",
-                             "80 kHz Low Pass",
-                             "Left Plug-in Filter",
-                             "Right Plug-in Filter"]
+        self.meas_filters = [["LP Filters Off",
+                             "30 kHz Low Pass",
+                             "80 kHz Low Pass"],
+                             ["HP Filters Off",
+                             "400Hz HP Filter",
+                             "pso filtre"]]
+
+        self.meas_filters_code = [["L0",
+                                   "L1",
+                                   "L2"],
+                                   ["H0",
+                                    "H1",
+                                    "H2"]]
+                             
+                            
+
+
+        self.gpib_dev = None
 
         self.plt=[]
+        self.nbLines=1
         myList=[]
-        myList=self.Dict2List(self.meas_dict)
+        #myList=self.Dict2List(self.meas_dict)
         self.comboBMeasType.Clear()
-        self.comboBMeasType.Set(myList)
-        self.comboBMeasType.SetValue(myList[0])
+        self.comboBMeasType.Set(self.meas_type)
+        self.comboBMeasType.SetValue(self.meas_type[0])
 
         self.setPanelConfig()
 
@@ -79,13 +105,18 @@ class myGui(fMain):
     
     def build_filter_list(self):
         sizerFilter = wx.BoxSizer(wx.VERTICAL)
-
-        pos=0
+        sizerFilterGroup = []
+        posSizer=0
         self.radioFilter=[]
-        for filterTag in self.meas_filters:
-            self.radioFilter.append( wx.RadioButton(self.panelFilter, wx.ID_ANY,filterTag,wx.DefaultPosition,wx.DefaultSize,0))
-            sizerFilter.Add(self.radioFilter[pos], 0,wx.EXPAND | wx.ALL | wx.GROW )
-            pos+=1
+
+        for filterGroup in self.meas_filters:
+
+            self.radioFilter.append( wx.RadioBox(self.panelFilter, label="Filter Group "+str(posSizer),choices= filterGroup,style = wx.RA_SPECIFY_ROWS))
+            #self.radioFilter[posSizer].bind(wx.EVT_RADIOBOX,self.onRadioBox)
+            sizerFilter.Add(self.radioFilter[posSizer],1,wx.EXPAND | wx.ALL | wx.GROW)
+
+            posSizer+=1
+
         self.panelFilter.SetSizer(sizerFilter)
         self.panelFilter.Layout()
 
@@ -161,9 +192,10 @@ class myGui(fMain):
             mylist.append(v)
         return mylist
    
-    def onColor(self, event):
-        rb = event.GetEventObject() 
-        self.meas_conf["color"]=colorlist[int(rb.GetLabel())]
+    def onNbLines(self, event):
+        #rb = event.GetEventObject() 
+        #self.nbLines=int(rb.GetLabel())
+        self.nbLines=int(self.rbNbLines.GetStringSelection())
 
     def OnStart(self, event):
         self.statusBar.SetStatusText("start measurment")
@@ -181,6 +213,8 @@ class myGui(fMain):
             strtf = self.startFreq.GetValue()
             stopf = self.stopFreq.GetValue()
             num_steps = self.stepFreq.GetValue()
+            
+            amp = self.amp.GetValue()
 
             decs = math.log10(stopf/strtf)
             npoints = (int(decs*num_steps)+1)
@@ -199,17 +233,59 @@ class myGui(fMain):
 
             amp_buf = ((stop_amp - start_amp)*0.1)/2.0
             self.panel.axes.set_xlim(((start_amp - amp_buf), (stop_amp + amp_buf)))
-        if len(self.plt) == 3:
+
+        pltID=len(self.plt)
+        if pltID >= self.nbLines:
             self.plt=[]
-        self.plt.append(self.panel.axes.plot([],[], self.meas_conf["color"],marker = 'o',label=self.meas_conf["color"])[0])
+            self.onClear( event)
+            pltID=len(self.plt)
+
+        self.plt.append(self.panel.axes.plot([],[], color=colorlist[pltID],marker = 'o',label=pltID)[0])
 
         for i in lsteps: 
-            meas_point = random.randint(1, 10)
+            if self.checkDemo.GetValue():
+                meas_point = random.randint(1, 10)
+            else:
+                meas_point = self.send_measurement( i, amp )
 
             self.x.append(float(i))
             self.y.append(float(meas_point))
           
             self.update_plot(self.x, self.y,(len(self.plt)-1))
+        #print(self.x)
+        #print(self.y)
+
+    #def send_measurement(self, meas, unit, freq, amp, filters, ratio = 0):
+    def send_measurement(self,freq,amp):
+        samp=0
+
+        measurement = self.meas_type_code[self.meas_conf["type"]] 
+
+        index=0
+        filter_s = ""
+        for fil in self.radioFilter:
+            filID=fil.GetSelection()
+            filter_s+=self.meas_filters_code[index][filID]
+            index+=1
+
+        meas_unit = self.meas_unit_code[self.meas_conf["unit"]]
+
+        rat = ""
+
+        source_freq = ("FR%.4EHZ" % freq)
+        source_ampl = ("AP%.4EVL" % amp)
+
+        payload = source_freq + source_ampl + measurement + filter_s + meas_unit + rat #+ "T3"
+        print(payload)
+
+        #self.gpib_dev.write(payload)
+
+        ## sleep is needed to fixe communication issues
+        #time.sleep(0.5)
+
+        #status, samp = self.gpib_dev.read()
+        print(samp)
+        return(samp)
 
     def onClear(self, event):
         self.panel.clear()
@@ -258,6 +334,8 @@ class myGui(fMain):
 
     def onGPIBConnect(self, event):
         self.setup_gpib()
+        self.panelSetup.Enable()
+        self.panelMeas.Enable()
         #self.GPIBStatus.SetBitmap(wx.Bitmap( "icon/connected.png") )
 
         return

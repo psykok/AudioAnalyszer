@@ -1,0 +1,53 @@
+---
+8903A:
+        meas_type:
+                - THD+n
+                - Frequency Response
+                - THD+n (Ratio)
+                - Frequency Response (Ratio)
+                - Ouput Level
+
+        meas_type_code:
+                - M3
+                - M1
+                - M3
+                - M1
+                - M1
+        meas_unit_code:
+                - LN
+                - LG
+        meas_unit:
+                -                
+                  - '%'
+                  - dB
+                -
+                  - V
+                  - dBm
+                -
+                  - '%'
+                  - dB
+                -
+                  - '%'
+                  - dB
+                -
+                  - V
+                  - dBm
+        meas_filters:
+                -
+                  - LP Filters Off
+                  - 30 kHz Low Pass
+                  - 80 kHz Low Pass
+                -
+                  - HP Filters Off
+                  - 400Hz HP Filter
+                  - pso Filter
+        meas_filters_code:
+                -
+                  - L0
+                  - L1
+                  - L2
+                -
+                  - H0
+                  - H1
+                  - H2
+               
